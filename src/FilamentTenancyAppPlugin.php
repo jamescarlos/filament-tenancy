@@ -35,11 +35,11 @@ class FilamentTenancyAppPlugin implements Plugin
                     PreventAccessFromCentralDomains::class,
                     RedirectIfInertiaMiddleware::class,
                 ])
-                ->middleware([
+                ->persistentMiddleware([
                     'universal',
                     FilamentTenancyServiceProvider::TENANCY_IDENTIFICATION,
                     PreventAccessFromCentralDomains::class,
-                ], isPersistent: true);
+                ]);
 
             $domains = tenant()?->domains()->pluck('domain') ?? [];
             $panel->domains($domains);

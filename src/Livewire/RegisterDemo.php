@@ -7,11 +7,10 @@ use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms;
-use Filament\Forms\Get;
+use Filament\Schema;
+use Filament\Schema\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Illuminate\Support\Facades\Hash;
@@ -37,11 +36,11 @@ class RegisterDemo extends Component implements HasActions, HasForms
             ->modalDescription('you will start a SaaS for you with sub-domain to test our plugins')
             ->modalSubmitActionLabel('Register')
             ->form([
-                Forms\Components\Grid::make([
+                Schema\Grid::make([
                     'sm' => 1,
                     'lg' => 2
                 ])->schema([
-                    Forms\Components\ToggleButtons::make('loginBy')
+                    Schema\ToggleButtons::make('loginBy')
                         ->label('Sign Up By')
                         ->inline()
                         ->default('github')
@@ -62,23 +61,23 @@ class RegisterDemo extends Component implements HasActions, HasForms
                             'discord' => 'Discord Account',
                             'register' => 'Discord Username',
                         ]),
-                    Forms\Components\TextInput::make('name')
+                    Schema\TextInput::make('name')
                         ->label('Discord username')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->required()
                         ->unique(table:'tenants', ignoreRecord: true)->live(onBlur: true)
                         ->columnSpanFull()
-                        ->afterStateUpdated(function(Forms\Set $set, $state) {
+                        ->afterStateUpdated(function(Schema\Set $set, $state) {
                             $set('id', $slug = \Str::of($state)->slug('_')->toString());
                             $set('domain', \Str::of($state)->slug()->toString());
                         }),
-                    Forms\Components\TextInput::make('id')
+                    Schema\TextInput::make('id')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->disabled()
                         ->label('Unique ID')
                         ->required()
                         ->unique(table: 'tenants', ignoreRecord: true),
-                    Forms\Components\TextInput::make('domain')
+                    Schema\TextInput::make('domain')
                         ->disabled()
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->label('Sub-Domain')
@@ -87,15 +86,15 @@ class RegisterDemo extends Component implements HasActions, HasForms
                         ->prefix('https://')
                         ->suffix(".".request()->getHost())
                     ,
-                    Forms\Components\TextInput::make('email')
+                    Schema\TextInput::make('email')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->required()
                         ->email(),
-                    Forms\Components\TextInput::make('phone')
+                    Schema\TextInput::make('phone')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->required()
                         ->tel(),
-                    Forms\Components\TextInput::make('password')
+                    Schema\TextInput::make('password')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->label('Password')
                         ->password()
@@ -106,14 +105,14 @@ class RegisterDemo extends Component implements HasActions, HasForms
                         ->dehydrateStateUsing(fn ($state): string => Hash::make($state))
                         ->live(debounce: 500)
                         ->same('passwordConfirmation'),
-                    Forms\Components\TextInput::make('passwordConfirmation')
+                    Schema\TextInput::make('passwordConfirmation')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->label('Password Confirmation')
                         ->password()
                         ->revealable(filament()->arePasswordsRevealable())
                         ->required()
                         ->dehydrated(false),
-                    Forms\Components\CheckboxList::make('packages')
+                    Schema\CheckboxList::make('packages')
                         ->searchable()
                         ->label('Plugins')
                         ->hint('Select the plugins you want to install')
@@ -210,11 +209,11 @@ class RegisterDemo extends Component implements HasActions, HasForms
             ->modalDescription('please use username or password to login or use social login')
             ->modalSubmitActionLabel('Login')
             ->form([
-                Forms\Components\Grid::make([
+                Schema\Grid::make([
                     'sm' => 1,
                     'lg' => 2
                 ])->schema([
-                    Forms\Components\ToggleButtons::make('loginBy')
+                    Schema\ToggleButtons::make('loginBy')
                         ->label('Sign In By')
                         ->inline()
                         ->default('github')
@@ -235,11 +234,11 @@ class RegisterDemo extends Component implements HasActions, HasForms
                             'discord' => 'Discord Account',
                             'register' => 'Discord Username',
                         ]),
-                    Forms\Components\TextInput::make('email')
+                    Schema\TextInput::make('email')
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->required()
                         ->email(),
-                    Forms\Components\TextInput::make('password')
+                    Schema\TextInput::make('password')
                         ->required()
                         ->hidden(fn(Get $get) => $get('loginBy') !== 'register')
                         ->label('Password')

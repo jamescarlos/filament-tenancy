@@ -6,8 +6,8 @@ use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use DanHarrin\LivewireRateLimiting\WithRateLimiting;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Schema;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\SimplePage;
@@ -42,7 +42,7 @@ class RegisterOtp extends SimplePage
     public function form(Form $form): Form
     {
         return $form->schema([
-            TextInput::make('otp')
+            Schema\TextInput::make('otp')
                 ->label('OTP Code')
                 ->numeric()
                 ->maxLength(6)
