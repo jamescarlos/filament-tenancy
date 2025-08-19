@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use TomatoPHP\FilamentTenancy\Models\Tenant;
+use Filament\Forms\Components;
 
 class RegisterOtp extends SimplePage
 {
@@ -39,10 +40,10 @@ class RegisterOtp extends SimplePage
         }
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
-            Schema\TextInput::make('otp')
+        return $schema->components([
+            Components\TextInput::make('otp')
                 ->label('OTP Code')
                 ->numeric()
                 ->maxLength(6)

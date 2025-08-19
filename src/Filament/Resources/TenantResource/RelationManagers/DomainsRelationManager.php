@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
@@ -34,7 +35,7 @@ class DomainsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Schema\TextInput::make('domain')
+                Components\TextInput::make('domain')
                     ->required()
                     ->label(trans('filament-tenancy::messages.domains.columns.domain'))
                     ->prefix(request()->getScheme()."://")
