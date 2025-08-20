@@ -41,7 +41,7 @@ class FilamentTenancyAppPlugin implements Plugin
                     PreventAccessFromCentralDomains::class,
                 ]);
 
-            $domains = tenant()?->domains()->pluck('domain') ?? [];
+            $domains = tenant()?->domains()->pluck('domain')->toArray() ?? [];
             $panel->domains($domains);
         }
     }
