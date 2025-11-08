@@ -2,12 +2,12 @@
 
 namespace TomatoPHP\FilamentTenancy\Concerns\Model;
 
-use RuntimeException;
-use DB;
 use Auth;
-use TomatoPHP\FilamentTenancy\Contracts\DocStatus;
+use DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use RuntimeException;
+use TomatoPHP\FilamentTenancy\Contracts\DocStatus;
 use TomatoPHP\FilamentTenancy\Models\DocumentCancellation;
 
 trait HasDocStatus
@@ -23,13 +23,13 @@ trait HasDocStatus
             }
         });
         static::updating(function (Model $model) {
-            if (!$model->isDraft()) {
+            if (! $model->isDraft()) {
                 throw new RuntimeException('You can only update documents which are in draft mode.');
             }
         });
 
         static::deleting(function (Model $model) {
-            if (!$model->isDraft()) {
+            if (! $model->isDraft()) {
                 throw new RuntimeException('You can only delete documents which are in draft mode.');
             }
         });
@@ -88,12 +88,12 @@ trait HasDocStatus
     public function submit($onlyIfDraft = true): static
     {
         // If we only want to submit drafts and this isn't a draft, return early
-        if ($onlyIfDraft && !$this->isDraft()) {
+        if ($onlyIfDraft && ! $this->isDraft()) {
             return $this;
         }
 
         // If forcing submission but it's not a draft, throw exception
-        if (!$onlyIfDraft && !$this->isDraft()) {
+        if (! $onlyIfDraft && ! $this->isDraft()) {
             throw new RuntimeException('Document is not in draft status and cannot be submitted.');
         }
 
@@ -109,7 +109,9 @@ trait HasDocStatus
 
     public function cancel(?string $reason = ''): static
     {
-        if (!$this->isSubmitted()) throw new RuntimeException('Only Submitted Documents can be Cancelled.');
+        if (! $this->isSubmitted()) {
+            throw new RuntimeException('Only Submitted Documents can be Cancelled.');
+        }
         DB::transaction(function () use ($reason) {
             $this->canceling($reason);
             $this->doc_status = DocStatus::CANCELLED;

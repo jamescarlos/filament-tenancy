@@ -3,9 +3,8 @@
 namespace TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource\Pages;
 
 use Filament\Actions\CreateAction;
-use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
 
 class ListTenants extends ListRecords
 {

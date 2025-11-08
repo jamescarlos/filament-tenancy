@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use TomatoPHP\FilamentTenancy\Models\Team;
+
 use function TomatoPHP\FilamentTenancy\framework;
 
 trait HasTeam
@@ -17,14 +18,15 @@ trait HasTeam
 
     public function hasTeamColumn(): bool
     {
-        return Schema::hasColumn($this->getModel()->getTable(),'team_id');
+        return Schema::hasColumn($this->getModel()->getTable(), 'team_id');
     }
+
     public static function bootHasTeam(): void
     {
         self::creating(function (Model $model) {
             $col = static::getTeamColumnName();
             if ($model->hasTeamColumn()) {
-                if (!$model->{$col}) {
+                if (! $model->{$col}) {
                     if (auth()->check()) {
                         $model->{$col} = auth()->user()->team?->id;
                     } else {
@@ -45,10 +47,10 @@ trait HasTeam
                     if ($user) {
                         $query->whereBelongsTo($user->team)
                             ->orWhereNull('team_id')
-                            ->orWhere('team_id','=', framework()->defaultTeam()?->id);
-                    } else  {
+                            ->orWhere('team_id', '=', framework()->defaultTeam()?->id);
+                    } else {
                         $query->whereNull('team_id')
-                            ->orWhere('team_id','=', framework()->defaultTeam()?->id);
+                            ->orWhere('team_id', '=', framework()->defaultTeam()?->id);
                     }
                 }
             });
@@ -57,16 +59,20 @@ trait HasTeam
 
     public function team()
     {
-        if (!$this->hasTeamColumn()) return null;
+        if (! $this->hasTeamColumn()) {
+            return null;
+        }
+
         return $this->belongsTo(Team::class, $this->getTeamColumnName());
     }
 
     protected function initializeHasTeam()
     {
-//        $this->casts['is_cross_team'] = 'bool';
+        //        $this->casts['is_cross_team'] = 'bool';
     }
 
-    protected static function getSharedModels() {
-        return config('core.shared_team_models',[]);
+    protected static function getSharedModels()
+    {
+        return config('core.shared_team_models', []);
     }
 }

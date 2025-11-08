@@ -2,14 +2,11 @@
 
 namespace TomatoPHP\FilamentTenancy;
 
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Stancl\JobPipeline\JobPipeline;
-use Stancl\Tenancy\Events\SyncedResourceChangedInForeignDatabase;
 use Stancl\Tenancy\Events;
 use Stancl\Tenancy\Jobs;
 use Stancl\Tenancy\Listeners;
@@ -21,11 +18,9 @@ class FilamentTenancyServiceProvider extends ServiceProvider
 {
     // By default, no namespace is used to support the callable array syntax.
     public static string $controllerNamespace = '';
+
     const TENANCY_IDENTIFICATION = Middleware\InitializeTenancyByDomain::class;
 
-    /**
-     * @return array
-     */
     public function databaseEvents(): array
     {
         return [
@@ -35,7 +30,6 @@ class FilamentTenancyServiceProvider extends ServiceProvider
                     Jobs\CreateDatabase::class,
                     Jobs\MigrateDatabase::class,
                     Jobs\SeedDatabase::class,
-
 
                     // Your own jobs to prepare the tenant.
                     // Provision API keys, create S3 buckets, anything you want!
@@ -75,47 +69,49 @@ class FilamentTenancyServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //Register generate command
+        // Register commands
         $this->commands([
-           \TomatoPHP\FilamentTenancy\Console\FilamentTenancyInstall::class,
+            \TomatoPHP\FilamentTenancy\Console\FilamentTenancyInstall::class,
+            \TomatoPHP\FilamentTenancy\Console\Commands\PreventRouteCache::class,
+            \TomatoPHP\FilamentTenancy\Console\Commands\SafeOptimize::class,
         ]);
 
-        //Register Config file
+        // Register Config file
         $this->mergeConfigFrom(__DIR__.'/../config/filament-tenancy.php', 'filament-tenancy');
 
-        //Publish Config
+        // Publish Config
         $this->publishes([
-           __DIR__.'/../config/filament-tenancy.php' => config_path('filament-tenancy.php'),
+            __DIR__.'/../config/filament-tenancy.php' => config_path('filament-tenancy.php'),
         ], 'filament-tenancy-config');
 
-        if (!config('filament-tenancy.single_database')) {
-            //Register Migrations
+        if (! config('filament-tenancy.single_database')) {
+            // Register Migrations
             $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-            //Publish Migrations
+            // Publish Migrations
             $this->publishes([
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'filament-tenancy-migrations');
         }
 
-        //Register views
+        // Register views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'filament-tenancy');
 
-        //Publish Views
+        // Publish Views
         $this->publishes([
-           __DIR__.'/../resources/views' => resource_path('views/vendor/filament-tenancy'),
+            __DIR__.'/../resources/views' => resource_path('views/vendor/filament-tenancy'),
         ], 'filament-tenancy-views');
 
-        //Register Langs
+        // Register Langs
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'filament-tenancy');
 
-        //Publish Lang
+        // Publish Lang
         $this->publishes([
-           __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-tenancy'),
+            __DIR__.'/../resources/lang' => base_path('lang/vendor/filament-tenancy'),
         ], 'filament-tenancy-lang');
 
-        //Register Routes
-//        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        // Register Routes
+        //        $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
     }
 
@@ -127,20 +123,20 @@ class FilamentTenancyServiceProvider extends ServiceProvider
         $this->makeTenancyMiddlewareHighestPriority();
         $this->modifyStaticConfigs();
         $this->prepareLivewireForTenancy();
+        $this->preventRouteCacheIssues();
 
         FrameworkColumns::registerMacros();
 
         $this->loadViewComponentsAs('tomato', [
-            ApplicationLogo::class
+            ApplicationLogo::class,
         ]);
     }
 
     protected function bootEvents()
     {
-        $events = !config('filament-tenancy.single_database', false)
+        $events = ! config('filament-tenancy.single_database', false)
             ? array_merge($this->databaseEvents(), $this->defaultEvents())
             : $this->defaultEvents();
-
 
         foreach ($events as $event => $listeners) {
             foreach ($listeners as $listener) {
@@ -183,7 +179,7 @@ class FilamentTenancyServiceProvider extends ServiceProvider
 
     private function prepareLivewireForTenancy(): void
     {
-        if(request()->host() !== config('filament-tenancy.central_domain')){
+        if (request()->host() !== config('filament-tenancy.central_domain')) {
 
             Livewire::setUpdateRoute(function ($handle) {
                 return Route::post('/livewire/update', $handle)
@@ -202,5 +198,27 @@ class FilamentTenancyServiceProvider extends ServiceProvider
         Middleware\InitializeTenancyBySubdomain::$onFail = function ($e) {
             return redirect(config('app.url'));
         };
+    }
+
+    /**
+     * Detect and handle route cache to prevent multi-tenancy issues.
+     */
+    private function preventRouteCacheIssues(): void
+    {
+        $routeCachePath = $this->app->bootstrapPath('cache/routes-v7.php');
+
+        // Check if routes are cached
+        if (file_exists($routeCachePath)) {
+            // Automatically clear the route cache
+            @unlink($routeCachePath);
+
+            // Log a warning in development
+            if ($this->app->environment('local', 'development')) {
+                logger()->warning(
+                    'Route cache was automatically cleared by Filament Tenancy. '.
+                    'Route caching is incompatible with multi-tenant domain identification.'
+                );
+            }
+        }
     }
 }

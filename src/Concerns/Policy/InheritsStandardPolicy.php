@@ -2,10 +2,10 @@
 
 namespace TomatoPHP\FilamentTenancy\Concerns\Policy;
 
-use Str;
 use App\Models\User;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Illuminate\Database\Eloquent\Model;
+use Str;
 use TomatoPHP\FilamentTenancy\Helpers\Framework;
 
 trait InheritsStandardPolicy
@@ -17,7 +17,7 @@ trait InheritsStandardPolicy
         return FilamentShield::getPermissionIdentifier($this->getResourceClass());
     }
 
-    public function makeSuffixFromModel(Model | string $model): string
+    public function makeSuffixFromModel(Model|string $model): string
     {
         if (is_string($model)) {
             $class = $model::getModel()->getMorphClass();
@@ -46,27 +46,27 @@ trait InheritsStandardPolicy
 
     public function update(User $user, Model $model): bool
     {
-        return !$this->isImmutable() && $user->can("update_{$this->getSuffix()}") && (! Framework::model_has_doc_status($model) || $model->isDraft());
+        return ! $this->isImmutable() && $user->can("update_{$this->getSuffix()}") && (! Framework::model_has_doc_status($model) || $model->isDraft());
     }
 
     public function deleteAny(User $user): bool
     {
-        return !$this->isImmutable() && $user->can("delete_any_{$this->getSuffix()}");
+        return ! $this->isImmutable() && $user->can("delete_any_{$this->getSuffix()}");
     }
 
     public function delete(User $user, Model $model)
     {
-        return !$this->isImmutable() && $user->can("delete_{$this->getSuffix()}") && (! Framework::model_has_doc_status($model) || $model->isDraft());
+        return ! $this->isImmutable() && $user->can("delete_{$this->getSuffix()}") && (! Framework::model_has_doc_status($model) || $model->isDraft());
     }
 
     public function submit(User $user, Model $model): bool
     {
-        return  $user->can($this->perm('submit')) && Framework::model_has_doc_status($model) && $model->isDraft();
+        return $user->can($this->perm('submit')) && Framework::model_has_doc_status($model) && $model->isDraft();
     }
 
     public function cancel(User $user, Model $model): bool
     {
-        return !$this->isImmutable() && $user->can($this->perm('cancel')) && Framework::model_has_doc_status($model) && $model->isSubmitted();
+        return ! $this->isImmutable() && $user->can($this->perm('cancel')) && Framework::model_has_doc_status($model) && $model->isSubmitted();
     }
 
     public function reverse(User $user, Model $model): bool
@@ -93,10 +93,12 @@ trait InheritsStandardPolicy
     {
         return $user->can("delete_{$this->getSuffix()}") && (! Framework::model_has_doc_status($model) || $model->isDraft());
     }
+
     public function isImmutable(): bool
     {
         $model = $this->getResourceClass()::getModel();
-        return method_exists($model,'hasImmutableTrait');
+
+        return method_exists($model, 'hasImmutableTrait');
     }
 
     public function perm(string $prefix): string

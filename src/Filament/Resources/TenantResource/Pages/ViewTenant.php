@@ -3,10 +3,8 @@
 namespace TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource\Pages;
 
 use Filament\Actions\EditAction;
-use Filament\Support\Enums\Width;
-use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
-use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
 
 class ViewTenant extends ViewRecord
 {

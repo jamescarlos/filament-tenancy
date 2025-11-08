@@ -2,13 +2,11 @@
 
 namespace TomatoPHP\FilamentTenancy\Filament\Pages;
 
-use Filament\Auth\Pages\Login;
-use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
+use Filament\Auth\Pages\Login;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 
 class TenantLogin extends Login
 {
@@ -43,5 +41,4 @@ class TenantLogin extends Login
 
         return app(LoginResponse::class);
     }
-
 }

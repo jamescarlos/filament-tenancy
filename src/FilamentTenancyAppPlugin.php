@@ -7,7 +7,6 @@ use Filament\Panel;
 use Nwidart\Modules\Module;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 use TomatoPHP\FilamentTenancy\Filament\Pages\TenantLogin;
-use TomatoPHP\FilamentTenancy\Http\Middleware\ApplyPanelColorsMiddleware;
 use TomatoPHP\FilamentTenancy\Http\Middleware\RedirectIfInertiaMiddleware;
 
 class FilamentTenancyAppPlugin implements Plugin
@@ -21,14 +20,13 @@ class FilamentTenancyAppPlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        if(class_exists(Module::class) && \Nwidart\Modules\Facades\Module::find('FilamentTenancy')?->isEnabled()){
+        if (class_exists(Module::class) && \Nwidart\Modules\Facades\Module::find('FilamentTenancy')?->isEnabled()) {
             $this->isActive = true;
-        }
-        else {
+        } else {
             $this->isActive = true;
         }
 
-        if($this->isActive) {
+        if ($this->isActive) {
             $panel
                 ->login(TenantLogin::class)
                 ->middleware([
@@ -53,6 +51,6 @@ class FilamentTenancyAppPlugin implements Plugin
 
     public static function make(): static
     {
-        return new static();
+        return new static;
     }
 }

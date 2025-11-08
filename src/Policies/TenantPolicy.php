@@ -2,10 +2,10 @@
 
 namespace TomatoPHP\FilamentTenancy\Policies;
 
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
-use TomatoPHP\FilamentTenancy\Models\Tenant;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Spatie\Permission\Models\Permission;
+use TomatoPHP\FilamentTenancy\Models\Tenant;
 
 class TenantPolicy
 {
@@ -21,7 +21,7 @@ class TenantPolicy
      */
     public function viewAny($user): bool
     {
-        return $this->hasRoles()? $user->can('view_any_tenant') : true;
+        return $this->hasRoles() ? $user->can('view_any_tenant') : true;
     }
 
     /**
@@ -29,7 +29,7 @@ class TenantPolicy
      */
     public function view($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('view_tenant') : true;
+        return $this->hasRoles() ? $user->can('view_tenant') : true;
     }
 
     /**
@@ -37,7 +37,7 @@ class TenantPolicy
      */
     public function create($user): bool
     {
-        return $this->hasRoles()?  $user->can('create_tenant') : true;
+        return $this->hasRoles() ? $user->can('create_tenant') : true;
     }
 
     /**
@@ -45,7 +45,7 @@ class TenantPolicy
      */
     public function update($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('update_tenant') : true;
+        return $this->hasRoles() ? $user->can('update_tenant') : true;
     }
 
     /**
@@ -53,7 +53,7 @@ class TenantPolicy
      */
     public function delete($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('delete_tenant') : true;
+        return $this->hasRoles() ? $user->can('delete_tenant') : true;
     }
 
     /**
@@ -61,7 +61,7 @@ class TenantPolicy
      */
     public function deleteAny($user): bool
     {
-        return $this->hasRoles()?  $user->can('delete_any_tenant') : true;
+        return $this->hasRoles() ? $user->can('delete_any_tenant') : true;
     }
 
     /**
@@ -69,7 +69,7 @@ class TenantPolicy
      */
     public function forceDelete($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('force_delete_tenant'): true;
+        return $this->hasRoles() ? $user->can('force_delete_tenant') : true;
     }
 
     /**
@@ -77,7 +77,7 @@ class TenantPolicy
      */
     public function forceDeleteAny($user): bool
     {
-        return $this->hasRoles()?  $user->can('force_delete_any_tenant'): true;
+        return $this->hasRoles() ? $user->can('force_delete_any_tenant') : true;
     }
 
     /**
@@ -85,7 +85,7 @@ class TenantPolicy
      */
     public function restore($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('restore_tenant'): true;
+        return $this->hasRoles() ? $user->can('restore_tenant') : true;
     }
 
     /**
@@ -93,7 +93,7 @@ class TenantPolicy
      */
     public function restoreAny($user): bool
     {
-        return $this->hasRoles()?  $user->can('restore_any_tenant'): true;
+        return $this->hasRoles() ? $user->can('restore_any_tenant') : true;
     }
 
     /**
@@ -101,7 +101,7 @@ class TenantPolicy
      */
     public function replicate($user, Tenant $tenant): bool
     {
-        return $this->hasRoles()?  $user->can('replicate_tenant'): true;
+        return $this->hasRoles() ? $user->can('replicate_tenant') : true;
     }
 
     /**
@@ -109,6 +109,6 @@ class TenantPolicy
      */
     public function reorder($user): bool
     {
-        return $this->hasRoles()?  $user->can('reorder_tenant'): true;
+        return $this->hasRoles() ? $user->can('reorder_tenant') : true;
     }
 }

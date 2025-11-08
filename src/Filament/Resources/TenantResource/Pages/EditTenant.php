@@ -2,13 +2,12 @@
 
 namespace TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource\Pages;
 
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Exception;
-use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\DB;
+use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
 
 class EditTenant extends EditRecord
 {
@@ -20,11 +19,14 @@ class EditTenant extends EditRecord
             Action::make('open')
                 ->label(trans('filament-tenancy::messages.actions.view'))
                 ->icon('heroicon-s-link')
-                ->url(fn($record) => request()->getScheme() . "://" . $record->domains()->first()?->domain . '.' . config('filament-tenancy.central_domain') . '/' . filament('filament-tenancy')->panel)
+                ->url(fn ($record) => request()->getScheme().'://'.$record->domains()->first()?->domain.'.'.config('filament-tenancy.central_domain').'/'.filament('filament-tenancy')->panel)
                 ->openUrlInNewTab(),
             DeleteAction::make()
                 ->icon('heroicon-s-trash')
-                ->label(trans('filament-tenancy::messages.actions.delete')),
+                ->label(trans('filament-tenancy::messages.actions.delete'))
+                // Disable database transaction because tenant deletion switches
+                // database connections, which breaks the transaction context
+                ->databaseTransaction(false),
         ];
     }
 
@@ -38,12 +40,12 @@ class EditTenant extends EditRecord
         ];
 
         if (isset($data['password'])) {
-            $updateData["password"] = $data['password'];
+            $updateData['password'] = $data['password'];
         }
 
         try {
-            if (!config('filament-tenancy.single_database')) {
-                $dbName = config('tenancy.database.prefix') . $record->id . config('tenancy.database.suffix');
+            if (! config('filament-tenancy.single_database')) {
+                $dbName = config('tenancy.database.prefix').$record->id.config('tenancy.database.suffix');
                 config(['database.connections.dynamic.database' => $dbName]);
             }
             DB::purge('dynamic');

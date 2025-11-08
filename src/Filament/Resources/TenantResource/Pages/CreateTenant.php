@@ -3,16 +3,14 @@
 namespace TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource\Pages;
 
 use Exception;
-use Filament\Support\Enums\Width;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Log;
-use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Support\Facades\FilamentView;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use TomatoPHP\FilamentTenancy\Models\Tenant;
+use Illuminate\Support\Facades\Log;
 use Throwable;
+use TomatoPHP\FilamentTenancy\Filament\Resources\TenantResource;
+use TomatoPHP\FilamentTenancy\Models\Tenant;
 use function Filament\Support\is_app_url;
 
 class CreateTenant extends CreateRecord
@@ -26,7 +24,6 @@ class CreateTenant extends CreateRecord
     {
         $record = parent::handleRecordCreation(collect($data)->except('domain')->toArray());
         $record->domains()->create(['domain' => collect($data)->get('domain')]);
-        Artisan::call('route:clear');
         return $record;
     }
 
@@ -85,13 +82,12 @@ class CreateTenant extends CreateRecord
             'email' => $record->email,
             'password' => $record->password,
             'created_at' => date('Y-m-d H:i:s'),
-            'updated_at' => date('Y-m-d H:i:s')
+            'updated_at' => date('Y-m-d H:i:s'),
         ];
 
         $user = DB::connection('dynamic')
             ->table('users')
             ->where('email', $record->email);
-
 
         if (config('filament-tenancy.single_database')) {
             $user = $user->where('tenant_id', $record->id);
@@ -109,23 +105,23 @@ class CreateTenant extends CreateRecord
         $this->redirect($redirectUrl, navigate: FilamentView::hasSpaMode() && is_app_url($redirectUrl));
     }
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 
     /**
      * @throws Throwable
      */
     private function createTenantRecord(array $data)
     {
-        Log::info("Saving Tenant");
+        Log::info('Saving Tenant');
         $record = new Tenant(collect($data)->except('domain')->toArray());
         $record->saveOrFail();
-        Log::info("Saving Domains");
+        Log::info('Saving Domains');
         $record = $record::find($record->id);
         $record->domains()->create(['domain' => collect($data)->get('domain')]);
-        return $record;
-    }
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
+        return $record;
     }
 }
