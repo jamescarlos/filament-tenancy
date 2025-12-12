@@ -51,7 +51,9 @@ class FilamentTenancyPlugin implements Plugin
                 ->middleware([
                     RedirectIfInertiaMiddleware::class,
                 ])
-                ->persistentMiddleware(['universal'])
+                // NOTE: Do NOT add 'universal' as persistentMiddleware for central panel
+                // The central panel manages tenants and should NOT have tenancy initialization
+                // Tenant panels should use FilamentTenancyAppPlugin instead
                 ->domains([
                     config('filament-tenancy.central_domain'),
                 ]);
