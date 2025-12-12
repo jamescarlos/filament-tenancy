@@ -123,7 +123,9 @@ class TenantResource extends Resource
                 TextColumn::make('name')
                     ->label(trans('filament-tenancy::messages.columns.name'))
                     ->description(function ($record) {
-                        return request()->getScheme() . '://' . $record->domains()->first()?->domain . '.' . config('filament-tenancy.central_domain') . '/';
+                        $path = filament('filament-tenancy')->getTenantPanelPath();
+
+                        return request()->getScheme() . '://' . $record->domains()->first()?->domain . '.' . config('filament-tenancy.central_domain') . $path;
                     }),
                 ToggleColumn::make('is_active')
                     ->sortable()
@@ -140,7 +142,11 @@ class TenantResource extends Resource
                     ->tooltip(trans('filament-tenancy::messages.actions.view'))
                     ->iconButton()
                     ->icon('heroicon-s-link')
-                    ->url(fn($record) => request()->getScheme() . '://' . $record->domains()->first()?->domain . '.' . config('filament-tenancy.central_domain') . '/')
+                    ->url(function ($record) {
+                        $path = filament('filament-tenancy')->getTenantPanelPath();
+
+                        return request()->getScheme() . '://' . $record->domains()->first()?->domain . '.' . config('filament-tenancy.central_domain') . $path;
+                    })
                     ->openUrlInNewTab(),
                 Action::make('login')
                     ->label(trans('filament-tenancy::messages.actions.login'))
@@ -151,7 +157,8 @@ class TenantResource extends Resource
                     ->iconButton()
                     ->icon('heroicon-s-arrow-left-on-rectangle')
                     ->action(function ($record) {
-                        $token = tenancy()->impersonate($record, 1, '/', 'web');
+                        $path = filament('filament-tenancy')->getTenantPanelPath();
+                        $token = tenancy()->impersonate($record, 1, $path, 'web');
 
                         return redirect()->to(request()->getScheme() . '://' . $record->domains[0]->domain . '.' . config('filament-tenancy.central_domain') . '/login/url?token=' . $token->token . '&email=' . urlencode($record->email));
                     }),
