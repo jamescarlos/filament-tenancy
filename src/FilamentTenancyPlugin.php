@@ -32,6 +32,21 @@ class FilamentTenancyPlugin implements Plugin
         return $this;
     }
 
+    /**
+     * Get the path for the tenant panel.
+     */
+    public function getTenantPanelPath(): string
+    {
+        try {
+            $panel = filament()->getPanel($this->panel);
+
+            return '/' . ltrim($panel->getPath(), '/');
+        } catch (\Exception $e) {
+            // Fallback to root if panel not found
+            return '/';
+        }
+    }
+
     public function register(Panel $panel): void
     {
         if(class_exists(Module::class) && \Nwidart\Modules\Facades\Module::find('FilamentTenancy')?->isEnabled()){
