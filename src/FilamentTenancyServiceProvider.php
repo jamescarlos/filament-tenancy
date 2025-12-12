@@ -181,23 +181,49 @@ class FilamentTenancyServiceProvider extends ServiceProvider
 
     private function prepareLivewireForTenancy(): void
     {
-        if(request()->host() !== config('filament-tenancy.central_domain')){
-
-            Livewire::setUpdateRoute(function ($handle) {
-                return Route::post('/livewire/update', $handle)
-                    ->middleware(
-                        [
-                            'web',
-                            'universal',
-                            static::TENANCY_IDENTIFICATION,
-                        ])->name('livewire.update');
-            });
+        // Only set custom Livewire route for tenant domains, not central domains
+        // Check must happen at request time, not boot time, because request()->host()
+        // is not available during artisan commands or early boot
+        $centralDomains = config('tenancy.central_domains', []);
+        $centralDomain = config('filament-tenancy.central_domain');
+        if ($centralDomain) {
+            $centralDomains[] = $centralDomain;
         }
+        $tenancyIdentification = static::TENANCY_IDENTIFICATION;
+
+        Livewire::setUpdateRoute(function ($handle) use ($centralDomains, $tenancyIdentification) {
+            // At request time, check if we're on a central domain
+            $currentHost = request()->host();
+            $isCentralDomain = in_array($currentHost, $centralDomains, true);
+
+            // For central domains, use minimal middleware (no tenancy)
+            // For tenant domains, use full tenancy middleware stack
+            $middleware = $isCentralDomain
+                ? ['web']
+                : ['web', 'universal', $tenancyIdentification];
+
+            return Route::post('/livewire/update', $handle)
+                ->middleware($middleware)
+                ->name('livewire.update');
+        });
     }
 
     private function modifyStaticConfigs(): void
     {
-        Middleware\InitializeTenancyBySubdomain::$onFail = function ($e) {
+        // Get central domains for the check
+        $centralDomains = config('tenancy.central_domains', []);
+        $centralDomain = config('filament-tenancy.central_domain');
+        if ($centralDomain) {
+            $centralDomains[] = $centralDomain;
+        }
+
+        Middleware\InitializeTenancyBySubdomain::$onFail = function ($e, $request, $next) use ($centralDomains) {
+            // On central domains, don't redirect - just continue without tenancy
+            $currentHost = $request->getHost();
+            if (in_array($currentHost, $centralDomains, true)) {
+                return $next($request);
+            }
+            // For non-central domains that fail tenant identification, redirect to app URL
             return redirect(config('app.url'));
         };
     }
