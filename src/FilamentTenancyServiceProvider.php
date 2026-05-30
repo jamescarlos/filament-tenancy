@@ -181,31 +181,20 @@ class FilamentTenancyServiceProvider extends ServiceProvider
 
     private function prepareLivewireForTenancy(): void
     {
-        // Only set custom Livewire route for tenant domains, not central domains
-        // Check must happen at request time, not boot time, because request()->host()
-        // is not available during artisan commands or early boot
-        $centralDomains = config('tenancy.central_domains', []);
-        $centralDomain = config('filament-tenancy.central_domain');
-        if ($centralDomain) {
-            $centralDomains[] = $centralDomain;
-        }
-        $tenancyIdentification = static::TENANCY_IDENTIFICATION;
-
-        Livewire::setUpdateRoute(function ($handle) use ($centralDomains, $tenancyIdentification) {
-            // At request time, check if we're on a central domain
-            $currentHost = request()->host();
-            $isCentralDomain = in_array($currentHost, $centralDomains, true);
-
-            // For central domains, use minimal middleware (no tenancy)
-            // For tenant domains, use full tenancy middleware stack
-            $middleware = $isCentralDomain
-                ? ['web']
-                : ['web', 'universal', $tenancyIdentification];
-
-            return Route::post('/livewire/update', $handle)
-                ->middleware($middleware)
-                ->name('livewire.update');
-        });
+        // Intentionally a no-op under Filament v5 / Livewire v4.
+        //
+        // The host application owns the Livewire `livewire.update` route (it sets
+        // the tenancy-aware middleware via Livewire::setUpdateRoute() in its own
+        // service provider). Livewire v4 no longer *replaces* the update route on
+        // each setUpdateRoute() call — it registers an additional route — so a
+        // package-level registration here produced a second route also named
+        // `livewire.update`, which throws a LogicException ("Another route has
+        // already been assigned name [livewire.update]") during route caching.
+        //
+        // The previous implementation also evaluated request()->host() inside the
+        // setUpdateRoute closure, which runs once at boot rather than per request,
+        // so its central-vs-tenant branching never worked as intended. Leave update
+        // route configuration to the host app.
     }
 
     private function modifyStaticConfigs(): void
